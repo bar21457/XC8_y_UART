@@ -2670,28 +2670,45 @@ extern __bank0 __bit __timeout;
 
 # 1 "C:\\Program Files\\Microchip\\xc8\\v2.40\\pic\\include\\c90\\stdint.h" 1 3
 # 43 "main.c" 2
-# 57 "main.c"
+# 53 "main.c"
+int c = 12;
+int i;
+
+char letra;
+char cadena[] = {'H', 'o', 'l', 'a', ' ', 'M', 'u', 'n', 'd', 'o'};
+
+
+
+
+
 void setup(void);
-
-
-
-
-void __attribute__((picinterrupt(("")))) isr (void){
-
-
-
-}
-
-
-
-
+void initUART(void);
+void Hola_Mundo(void);
+# 75 "main.c"
 void main(void) {
 
     setup();
+    initUART();
+
+
+
 
     while(1){
+# 99 "main.c"
+        Hola_Mundo();
 
+        if(TXSTAbits.TRMT == 1)
+        {
+            TXREG = PORTB;
+        }
 
+        if(PIR1bits.RCIF == 1)
+        {
+            PORTD = RCREG;
+            PIR1bits.RCIF = 0;
+        }
+
+        _delay((unsigned long)((100)*(8000000/4000.0)));
 
     }
     return;
@@ -2704,21 +2721,75 @@ void setup (void){
 
     ANSELH = 0;
 
-    TRISA = 0;
     TRISB = 0;
-    TRISC = 0;
     TRISD = 0;
-    TRISE = 0;
 
-    PORTA = 0;
     PORTB = 0;
-    PORTC = 0;
     PORTD = 0;
-    PORTE = 0;
 
 
 
-    OSCCONbits.IRCF = 0b011 ;
+    OSCCONbits.IRCF = 0b111 ;
     OSCCONbits.SCS = 1;
 
+    INTCONbits.GIE = 1;
+    PIE1bits.RCIE = 1;
+
+}
+
+void initUART(void){
+
+
+
+    SPBRG = 12;
+
+
+
+    TXSTAbits.SYNC = 0;
+    RCSTAbits.SPEN = 1;
+
+
+
+
+
+    TXSTAbits.TXEN = 1;
+
+    PIR1bits.TXIF = 0;
+
+    RCSTAbits.CREN = 1;
+
+    PIR1bits.RCIF = 0;
+}
+
+void Hola_Mundo(void){
+
+    if (c == 12)
+        {
+            c = 0;
+        }
+
+        else
+        {
+            c++;
+        }
+
+        for (int i = 0; i < 10; i++)
+        {
+            if (c <= 10)
+            {
+                PORTB = cadena[c];
+            }
+
+            if (c == 11)
+            {
+                PORTB = 10;
+            }
+
+            if (c == 12)
+            {
+                PORTB = 13;
+            }
+
+            else{}
+        }
 }

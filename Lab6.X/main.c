@@ -42,28 +42,32 @@
 #include <xc.h>
 #include <stdint.h>
 
-#define _XTAL_FREQ 500000
+#define _XTAL_FREQ 8000000
 
 //******************************************************************************
 // Variables
 //******************************************************************************
 
+//char A;
 
+int c = 12;
+int i;
+
+char letra;
+char cadena[] = {'H', 'o', 'l', 'a', ' ', 'M', 'u', 'n', 'd', 'o'};
 
 //******************************************************************************
 // Prototipos de Funciones
 //******************************************************************************
 
 void setup(void);
+void initUART(void);
+void Hola_Mundo(void);
 
 //******************************************************************************
 // Interrupciones
 //******************************************************************************
-void __interrupt() isr (void){
-
-    
-
-}
+//void __interrupt() isr (void){}
 
 //******************************************************************************
 // Código Principal
@@ -71,11 +75,42 @@ void __interrupt() isr (void){
 void main(void) {
     
     setup();
+    initUART();
     
+    //A = 'A';
+    //PORTB = A;
+            
     while(1){
         
+        //PreLab
         
+//        if(TXSTAbits.TRMT == 1){
+//        TXREG = PORTB;
+//
+//        }
+//        if(PIR1bits.RCIF == 1){
+//        PORTD = RCREG;
+//        PIR1bits.RCIF = 0;
+//        }
+//        __delay_ms(500);
         
+        //Lab
+        
+        Hola_Mundo();
+        
+        if(TXSTAbits.TRMT == 1)
+        {
+            TXREG = PORTB;
+        }
+        
+        if(PIR1bits.RCIF == 1)
+        {
+            PORTD = RCREG;
+            PIR1bits.RCIF = 0;
+        }
+    
+        __delay_ms(100);
+            
     }
     return;
 }
@@ -87,21 +122,75 @@ void setup (void){
     
     ANSELH = 0;
     
-    TRISA = 0;              //Configuración del PORTA como output
     TRISB = 0;              //Configuración del PORTB como output
-    TRISC = 0;              //Configuración del PORTC como output
     TRISD = 0;              //Configuración del PORTD como output
-    TRISE = 0;              //Configuración del PORTE como output
     
-    PORTA = 0;              //Limpiamos el PORTA
     PORTB = 0;              //Limpiamos el PORTB
-    PORTC = 0;              //Limpiamos el PORTC
     PORTD = 0;              //Limpiamos el PORTD
-    PORTE = 0;              //Limpiamos el PORTD
     
-    // Configuración del Oscilador Interno a 500KHz
+    // Configuración del Oscilador Interno a 8MHz
     
-    OSCCONbits.IRCF = 0b011 ;   // Selección de los 500KHz
+    OSCCONbits.IRCF = 0b111 ;   // Selección de los 8MHz
     OSCCONbits.SCS = 1;         // Selección del Oscilador Interno
+
+    INTCONbits.GIE = 1;         // Habilitamos las interrupciones globales
+    PIE1bits.RCIE = 1; 
     
+}
+    
+void initUART(void){
+    
+    // Paso 1: Configuramos la velocidad del Baud Rate
+    
+    SPBRG = 12;
+    
+    // Paso 2: Habilitamos el puerto serial asíncrono
+    
+    TXSTAbits.SYNC = 0;         // Trabajaremos de forma asincrona
+    RCSTAbits.SPEN = 1;         // Habilitamos el UART
+    
+    // Paso 3: Se salta porque no usamos 9 bits
+    
+    // Paso 4: Habilitamos la transmisión
+    
+    TXSTAbits.TXEN = 1;         // Habilitamos la transmision y la interrupción
+    
+    PIR1bits.TXIF = 0;          
+    
+    RCSTAbits.CREN = 1;         // Habilitamos la recepción
+    
+    PIR1bits.RCIF = 0;
+}
+
+void Hola_Mundo(void){
+
+    if (c == 12)
+        {
+            c = 0;
+        }
+        
+        else
+        {
+            c++;
+        }
+        
+        for (int i = 0; i < 10; i++)
+        {
+            if (c <= 10)
+            {       
+                PORTB = cadena[c];
+            }
+            
+            if (c == 11)
+            {
+                PORTB = 10;
+            }
+            
+            if (c == 12)
+            {
+                PORTB = 13;
+            }
+            
+            else{}
+        }
 }
