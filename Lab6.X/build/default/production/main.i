@@ -2670,12 +2670,35 @@ extern __bank0 __bit __timeout;
 
 # 1 "C:\\Program Files\\Microchip\\xc8\\v2.40\\pic\\include\\c90\\stdint.h" 1 3
 # 43 "main.c" 2
-# 53 "main.c"
-int c = 12;
-int i;
 
-char letra;
-char cadena[] = {'H', 'o', 'l', 'a', ' ', 'M', 'u', 'n', 'd', 'o'};
+
+
+
+
+
+
+
+uint8_t VAL_ADC;
+
+
+
+int bandera = 0;
+
+
+int letra = 0;
+
+char menu[] = {'E', 'l', 'i', 'g', 'e', ' ',
+                   'u', 'n', 'a', ' ',
+                   'o', 'p', 'c', 'i', 'o','n',
+                   10, 13,
+                   '1', ' ', '-', ' ',
+                   'L', 'e', 'e', 'r', ' ',
+                   'P', 'o', 't', 'e', 'n', 'c', 'i', 'o', 'm', 'e', 't', 'r', 'o',
+                   10, 13,
+                   '2', ' ', '-', ' ',
+                   'E', 'n', 'v', 'i', 'a', 'r', ' ',
+                   'A', 'S', 'C', 'I', 'I',
+                   10, 10, 13};
 
 
 
@@ -2683,33 +2706,62 @@ char cadena[] = {'H', 'o', 'l', 'a', ' ', 'M', 'u', 'n', 'd', 'o'};
 
 void setup(void);
 void initUART(void);
-void Hola_Mundo(void);
-# 75 "main.c"
+void setupADC(void);
+# 90 "main.c"
 void main(void) {
 
     setup();
     initUART();
+    setupADC();
 
 
 
 
     while(1){
-# 99 "main.c"
-        Hola_Mundo();
-
-        if(TXSTAbits.TRMT == 1)
+# 132 "main.c"
+        while (letra < 62)
         {
-            TXREG = PORTB;
+            if(TXSTAbits.TRMT == 1)
+            {
+                TXREG = menu[letra];
+                letra ++;
+                _delay((unsigned long)((10)*(8000000/4000.0)));
+            }
         }
 
-        if(PIR1bits.RCIF == 1)
-        {
-            PORTD = RCREG;
-            PIR1bits.RCIF = 0;
-        }
+            while (bandera == 0)
+            {
+                ADCON0bits.GO = 1;
+                while(ADCON0bits.GO == 1){;}
+                ADIF = 0;
+                VAL_ADC = ADRESH;
+                _delay((unsigned long)((100)*(8000000/4000000.0)));
 
-        _delay((unsigned long)((100)*(8000000/4000.0)));
+                if(PIR1bits.RCIF == 1)
+                {
+                    if (RCREG == '1')
+                    {
+                        TXREG = VAL_ADC;
+                        _delay((unsigned long)((100)*(8000000/4000.0)));
 
+                        TXREG = 10;
+                        TXREG = 13;
+                        bandera = 1;
+                    }
+                    if (RCREG == '2')
+                    {
+                        while(PIR1bits.RCIF == 0){;}
+                        if(PIR1bits.RCIF == 1)
+                        {
+                            PORTD = RCREG;
+                            PIR1bits.RCIF = 0;
+                        }
+                        bandera = 1;
+                    }
+                }
+            }
+            bandera = 0;
+            letra = 0;
     }
     return;
 }
@@ -2760,36 +2812,30 @@ void initUART(void){
 
     PIR1bits.RCIF = 0;
 }
+# 259 "main.c"
+void setupADC (void){
 
-void Hola_Mundo(void){
 
-    if (c == 12)
-        {
-            c = 0;
-        }
 
-        else
-        {
-            c++;
-        }
+    TRISAbits.TRISA0 = 1;
+    ANSELbits.ANS0 = 1;
 
-        for (int i = 0; i < 10; i++)
-        {
-            if (c <= 10)
-            {
-                PORTB = cadena[c];
-            }
 
-            if (c == 11)
-            {
-                PORTB = 10;
-            }
 
-            if (c == 12)
-            {
-                PORTB = 13;
-            }
+    ADCON0bits.ADCS0 = 1;
+    ADCON0bits.ADCS1 = 0;
 
-            else{}
-        }
+    ADCON1bits.VCFG0 = 0;
+    ADCON1bits.VCFG1 = 0;
+
+    ADCON0bits.CHS0 = 0;
+    ADCON0bits.CHS1 = 0;
+    ADCON0bits.CHS2 = 0;
+    ADCON0bits.CHS3 = 0;
+
+    ADCON1bits.ADFM = 0;
+
+    ADCON0bits.ADON = 1;
+
+    _delay((unsigned long)((100)*(8000000/4000000.0)));
 }

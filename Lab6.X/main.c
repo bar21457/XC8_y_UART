@@ -48,13 +48,27 @@
 // Variables
 //******************************************************************************
 
+uint8_t VAL_ADC;
+
+//int c = 12;
+//int i;
+int bandera = 0;
+
 //char A;
-
-int c = 12;
-int i;
-
-char letra;
-char cadena[] = {'H', 'o', 'l', 'a', ' ', 'M', 'u', 'n', 'd', 'o'};
+int letra = 0;
+//char cadena[] = {'H', 'o', 'l', 'a', ' ', 'M', 'u', 'n', 'd', 'o'};
+char menu[] = {'E', 'l', 'i', 'g', 'e', ' ',
+                   'u', 'n', 'a', ' ',
+                   'o', 'p', 'c', 'i', 'o','n',
+                   10, 13,
+                   '1', ' ', '-', ' ',
+                   'L', 'e', 'e', 'r', ' ',
+                   'P', 'o', 't', 'e', 'n', 'c', 'i', 'o', 'm', 'e', 't', 'r', 'o',
+                   10, 13,
+                   '2', ' ', '-', ' ',
+                   'E', 'n', 'v', 'i', 'a', 'r', ' ',
+                   'A', 'S', 'C', 'I', 'I',
+                   10, 10, 13};
 
 //******************************************************************************
 // Prototipos de Funciones
@@ -62,7 +76,8 @@ char cadena[] = {'H', 'o', 'l', 'a', ' ', 'M', 'u', 'n', 'd', 'o'};
 
 void setup(void);
 void initUART(void);
-void Hola_Mundo(void);
+void setupADC(void);
+//void Hola_Mundo(void);
 
 //******************************************************************************
 // Interrupciones
@@ -76,6 +91,7 @@ void main(void) {
     
     setup();
     initUART();
+    setupADC();
     
     //A = 'A';
     //PORTB = A;
@@ -96,21 +112,66 @@ void main(void) {
         
         //Lab
         
-        Hola_Mundo();
+//        Hola_Mundo();
+//        
+//        if(TXSTAbits.TRMT == 1)
+//        {
+//            TXREG = PORTB;
+//        }
+//        
+//        if(PIR1bits.RCIF == 1)
+//        {
+//            PORTD = RCREG;
+//            PIR1bits.RCIF = 0;
+//        }
+//    
+//        __delay_ms(100);
         
-        if(TXSTAbits.TRMT == 1)
+        //PostLab
+        
+        while (letra < 62)
         {
-            TXREG = PORTB;
+            if(TXSTAbits.TRMT == 1)
+            {
+                TXREG = menu[letra];
+                letra ++;
+                __delay_ms(10);
+            }
         }
         
-        if(PIR1bits.RCIF == 1)
-        {
-            PORTD = RCREG;
-            PIR1bits.RCIF = 0;
-        }
-    
-        __delay_ms(100);
-            
+            while (bandera == 0)
+            {
+                ADCON0bits.GO = 1;  //Iniciamos la conversión en el ADC
+                while(ADCON0bits.GO == 1){;}
+                ADIF = 0;           // Bajamos la bandera de interrupción del ADC
+                VAL_ADC = ADRESH;       //Pasamos el valor de ADRESH a ADC
+                __delay_us(100);
+
+                if(PIR1bits.RCIF == 1)
+                {
+                    if (RCREG == '1')
+                    {
+                        TXREG = VAL_ADC;    //Pasamos el valor de ADC al TXREG
+                        __delay_ms(100);
+
+                        TXREG = 10;     //Enter
+                        TXREG = 13;     //Corremos el cursor hasta la izquierda
+                        bandera = 1;
+                    }
+                    if (RCREG == '2')
+                    {
+                        while(PIR1bits.RCIF == 0){;}
+                        if(PIR1bits.RCIF == 1)
+                        {
+                            PORTD = RCREG;
+                            PIR1bits.RCIF = 0;
+                        }
+                        bandera = 1;
+                    }
+                }
+            }
+            bandera = 0;
+            letra = 0;
     }
     return;
 }
@@ -162,35 +223,62 @@ void initUART(void){
     PIR1bits.RCIF = 0;
 }
 
-void Hola_Mundo(void){
+//void Hola_Mundo(void){
+//
+//    if (c == 12)
+//        {
+//            c = 0;
+//        }
+//        
+//        else
+//        {
+//            c++;
+//        }
+//        
+//        for (int i = 0; i < 10; i++)
+//        {
+//            if (c <= 10)
+//            {       
+//                PORTB = cadena[c];
+//            }
+//            
+//            if (c == 11)
+//            {
+//                PORTB = 10;
+//            }
+//            
+//            if (c == 12)
+//            {
+//                PORTB = 13;
+//            }
+//            
+//            else{}
+//        }
+//}
 
-    if (c == 12)
-        {
-            c = 0;
-        }
-        
-        else
-        {
-            c++;
-        }
-        
-        for (int i = 0; i < 10; i++)
-        {
-            if (c <= 10)
-            {       
-                PORTB = cadena[c];
-            }
-            
-            if (c == 11)
-            {
-                PORTB = 10;
-            }
-            
-            if (c == 12)
-            {
-                PORTB = 13;
-            }
-            
-            else{}
-        }
+void setupADC (void){
+    
+    //Paso 1: Selección del puerto de entrada
+    
+    TRISAbits.TRISA0 = 1;       //Configuración del RA0 como input
+    ANSELbits.ANS0 = 1;         //Configuración del pin RA0 como análogo (AN0)
+    
+    //Paso 2: Configuración del módulo ADC
+    
+    ADCON0bits.ADCS0 = 1;
+    ADCON0bits.ADCS1 = 0;       //Fosc/8
+    
+    ADCON1bits.VCFG0 = 0;       //VDD como voltaje de referencia -
+    ADCON1bits.VCFG1 = 0;       //VSS como voltaje de referencia +
+    
+    ADCON0bits.CHS0 = 0;
+    ADCON0bits.CHS1 = 0;
+    ADCON0bits.CHS2 = 0;
+    ADCON0bits.CHS3 = 0;        //Selección del canal análogo AN0 (Default)
+    
+    ADCON1bits.ADFM = 0;        //Justificado hacia la izquierda
+    
+    ADCON0bits.ADON = 1;        //Habilitamos el ADC
+    
+    __delay_us(100);            //Delay para adquirir la lectura
 }
