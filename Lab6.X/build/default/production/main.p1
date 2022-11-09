@@ -468,7 +468,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 ]
 "60
 [; ;main.c: 60: char menu[] = {'E', 'l', 'i', 'g', 'e', ' ',
-[v _menu `uc ~T0 @X0 -> 61 `i e ]
+[v _menu `uc ~T0 @X0 -> 62 `i e ]
 [i _menu
 :U ..
 -> -> 69 `ui `uc
@@ -530,6 +530,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 -> -> 73 `ui `uc
 -> -> 73 `ui `uc
 -> -> 10 `i `uc
+-> -> 32 `ui `uc
 -> -> 10 `i `uc
 -> -> 13 `i `uc
 ..
@@ -629,8 +630,8 @@ Version 4.0 HI-TECH Software Intermediate Code
 [; ;main.c: 153:                     {
 {
 "154
-[; ;main.c: 154:                         TXREG = VAL_ADC;
-[e = _TXREG _VAL_ADC ]
+[; ;main.c: 154:                         TXREG = (VAL_ADC + 48);
+[e = _TXREG -> + -> _VAL_ADC `i -> 48 `i `uc ]
 "155
 [; ;main.c: 155:                         _delay((unsigned long)((100)*(8000000/4000.0)));
 [e ( __delay (1 -> * -> -> 100 `i `d / -> -> 8000000 `l `d .4000.0 `ul ]

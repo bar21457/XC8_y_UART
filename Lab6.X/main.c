@@ -68,7 +68,7 @@ char menu[] = {'E', 'l', 'i', 'g', 'e', ' ',
                    '2', ' ', '-', ' ',
                    'E', 'n', 'v', 'i', 'a', 'r', ' ',
                    'A', 'S', 'C', 'I', 'I',
-                   10, 10, 13};
+                   10, ' ', 10 ,13};
 
 //******************************************************************************
 // Prototipos de Funciones
@@ -151,7 +151,7 @@ void main(void) {
                 {
                     if (RCREG == '1')
                     {
-                        TXREG = VAL_ADC;    //Pasamos el valor de ADC al TXREG
+                        TXREG = (VAL_ADC + 48);    //Pasamos el valor de ADC al TXREG
                         __delay_ms(100);
 
                         TXREG = 10;     //Enter

@@ -2698,7 +2698,7 @@ char menu[] = {'E', 'l', 'i', 'g', 'e', ' ',
                    '2', ' ', '-', ' ',
                    'E', 'n', 'v', 'i', 'a', 'r', ' ',
                    'A', 'S', 'C', 'I', 'I',
-                   10, 10, 13};
+                   10, ' ', 10 ,13};
 
 
 
@@ -2741,7 +2741,7 @@ void main(void) {
                 {
                     if (RCREG == '1')
                     {
-                        TXREG = VAL_ADC;
+                        TXREG = (VAL_ADC + 48);
                         _delay((unsigned long)((100)*(8000000/4000.0)));
 
                         TXREG = 10;
